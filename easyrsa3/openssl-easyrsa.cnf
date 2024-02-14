@@ -16,6 +16,7 @@ new_certs_dir	= $dir/certs_by_serial	# default place for new certs.
 certificate	= $dir/ca.crt		# The CA certificate
 serial		= $dir/serial		# The current serial number
 crl		= $dir/crl.pem		# The current CRL
+crlnumber      = $dir/crlnumber
 private_key	= $dir/private/ca.key	# The private key
 RANDFILE	= $dir/.rand		# private random number file
 
@@ -116,7 +117,6 @@ serialNumber_default	= $ENV::EASYRSA_REQ_SERIAL
 [ basic_exts ]
 basicConstraints	= CA:FALSE
 subjectKeyIdentifier	= hash
-authorityKeyIdentifier	= keyid,issuer:always
 
 # The Easy-RSA CA extensions
 [ easyrsa_ca ]
@@ -124,15 +124,15 @@ authorityKeyIdentifier	= keyid,issuer:always
 # PKIX recommendations:
 
 subjectKeyIdentifier=hash
-authorityKeyIdentifier=keyid:always,issuer:always
+authorityKeyIdentifier=keyid:always
 
 # This could be marked critical, but it's nice to support reading by any
 # broken clients who attempt to do so.
-basicConstraints = CA:true
+basicConstraints = critical, CA:true
 
 # Limit key usage to CA tasks. If you really want to use the generated pair as
 # a self-signed cert, comment this out.
-keyUsage = cRLSign, keyCertSign
+keyUsage = critical, cRLSign, keyCertSign
 
 # nsCertType omitted by default. Let's try to let the deprecated stuff die.
 # nsCertType = sslCA
@@ -146,4 +146,4 @@ keyUsage = cRLSign, keyCertSign
 # Only issuerAltName and authorityKeyIdentifier make any sense in a CRL.
 
 # issuerAltName=issuer:copy
-authorityKeyIdentifier=keyid:always,issuer:always
+authorityKeyIdentifier=keyid:always
