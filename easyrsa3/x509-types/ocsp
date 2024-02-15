@@ -1,0 +1,8 @@
+# X509 extensions for an OCSP Responder
+basicConstraints = critical, CA:FALSE
+subjectKeyIdentifier = hash
+authorityKeyIdentifier = keyid:always
+extendedKeyUsage = critical, OCSPSigning
+keyUsage = critical, digitalSignature
+certificatePolicies = ia5org
+noCheck = ignored

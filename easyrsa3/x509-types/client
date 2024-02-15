@@ -1,7 +1,11 @@
 # X509 extensions for a client
 
-basicConstraints = CA:FALSE
+#basicConstraints = CA:FALSE
+basicConstraints = critical, CA:FALSE
 subjectKeyIdentifier = hash
-authorityKeyIdentifier = keyid,issuer:always
+#authorityKeyIdentifier = keyid,issuer:always
+authorityKeyIdentifier = keyid:always
 extendedKeyUsage = clientAuth
-keyUsage = digitalSignature
+keyUsage = critical, digitalSignature
+#keyUsage = digitalSignature
+#certificatePolicies = ia5org,@cpStandard

@@ -6,7 +6,8 @@
 #
 # basicConstraints = CA:TRUE, pathlen:1
 
-basicConstraints = CA:TRUE
+#basicConstraints = CA:TRUE
+basicConstraints = critical, CA:TRUE, pathlen:0
 subjectKeyIdentifier = hash
 authorityKeyIdentifier = keyid:always,issuer:always
-keyUsage = cRLSign, keyCertSign
+keyUsage = critical, cRLSign, keyCertSign

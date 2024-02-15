@@ -3807,6 +3807,7 @@ Run easyrsa without commands for usage and command help."
 	cipher=-aes256
 	want_ca=1
 	want_key=1
+	legacy=""
 	unset -v nokeys friendly_name
 	while [ "$1" ]; do
 		case "$1" in
@@ -3825,6 +3826,9 @@ Run easyrsa without commands for usage and command help."
 			;;
 			usefn)
 				friendly_name="$file_name_base"
+			;;
+			legacy)
+				legacy=-legacy
 			;;
 			*) warn "Ignoring unknown command option: '$1'"
 		esac
@@ -3941,6 +3945,7 @@ Missing User Certificate, expected at:
 
 		# export the p12:
 		easyrsa_openssl pkcs12 -export \
+			${legacy} \
 			-in "$crt_in" \
 			-out "$pkcs_out" \
 			${nokeys} \
