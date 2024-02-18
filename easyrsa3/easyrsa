@@ -819,7 +819,7 @@ easyrsa_mktemp: temp-file EXISTS: $want_tmp_file"
 						set -o noclobber
 					fi
 
-					if mv "$shotfile" "$want_tmp_file"; then
+					if /usr/bin/mv "$shotfile" "$want_tmp_file"; then
 						# Assign external temp-file name
 						if force_set_var "$1" "$want_tmp_file"
 						then
@@ -889,7 +889,7 @@ Temporary session not preserved."
 	# because the relate commands can die in subshells.
 	# Remove files when build_full()->sign_req() is interrupted
 	[ "$error_build_full_cleanup" ] && \
-		rm -f "$crt_out" "$req_out" "$key_out"
+		/usr/bin/rm -f "$crt_out" "$req_out" "$key_out"
 	# Restore files when renew is interrupted
 	[ "$error_undo_renew_move" ] && renew_restore_move
 	# Restore files when rebuild is interrupted
@@ -1139,7 +1139,7 @@ easyrsa_openssl: No Safe SSL conf, FALLBACK to default"
 	if [ "$openssl_command" = "makesafeconf" ]; then
 		# COPY temp-file to safessl-easyrsa.cnf
 		unset -v makesafeconf
-		cp -f "$safe_ssl_cnf_tmp" "$EASYRSA_SAFE_CONF" && \
+		/usr/bin/cp -f "$safe_ssl_cnf_tmp" "$EASYRSA_SAFE_CONF" && \
 				return
 		die "easyrsa_openssl: makesafeconf FAILED"
 	fi
@@ -1322,7 +1322,7 @@ and initialize a fresh PKI here."
 		case "$reset" in
 		hard)
 			# # # shellcheck disable=SC2115 # Use "${var:?}"
-			rm -rf "$EASYRSA_PKI" || \
+			/usr/bin/rm -rf "$EASYRSA_PKI" || \
 				die "init-pki hard reset failed."
 		;;
 		soft)
@@ -1336,7 +1336,7 @@ and initialize a fresh PKI here."
 				# # # shellcheck disable=SC2115 # Use "${var:?}"
 				target="$EASYRSA_PKI/$i"
 				if [ "${target%/*}" ]; then
-					rm -rf "$target" || \
+					/usr/bin/rm -rf "$target" || \
 						die "init-pki soft reset(1) failed!"
 				else
 					die "init-pki soft reset(2) failed!"
@@ -1482,7 +1482,7 @@ install_data_to_pki() {
 				if [ -e "${EASYRSA_PKI}/${source}" ]; then
 					continue
 				else
-					cp "${area}/${source}" "$EASYRSA_PKI" || die \
+					/usr/bin/cp "${area}/${source}" "$EASYRSA_PKI" || die \
 						"Failed to copy to PKI: ${area}/${source}"
 				fi
 			done
@@ -1941,11 +1941,11 @@ build_ca: CA certificate password created via temp-files"
 	fi
 
 	# Move temp-files to output files
-	mv "$out_key_tmp" "$out_key" || {
+	/usr/bin/mv "$out_key_tmp" "$out_key" || {
 		die "Failed to move key temp-file"
 	}
-	mv "$out_file_tmp" "$out_file" || {
-		rm -f "$out_key" # Also remove the key
+	/usr/bin/mv "$out_file_tmp" "$out_file" || {
+		/usr/bin/rm -f "$out_key" # Also remove the key
 		die "Failed to move cert temp-file"
 	}
 
@@ -2005,7 +2005,7 @@ at: $out_file"
 			-check -noout || \
 				die "Failed to validate DH params"
 
-	mv -f "$tmp_dh_file" "$out_file" || \
+	/usr/bin/mv -f "$tmp_dh_file" "$out_file" || \
 		die "Failed to move temp DH file"
 
 	notice "
@@ -2104,7 +2104,7 @@ $EASYRSA_EXTRA_EXTS"
 
 		# Insert $extra_exts @ %EXTRA_EXTS% in SSL Config
 		print "$extra_exts" | \
-			awk "$awkscript" "$EASYRSA_SSL_CONF" \
+			/usr/bin/awk "$awkscript" "$EASYRSA_SSL_CONF" \
 			> "$raw_ssl_cnf_tmp" || \
 				die "Writing SSL config to temp file failed"
 
@@ -2150,11 +2150,11 @@ $EASYRSA_EXTRA_EXTS"
 	fi
 
 	# Move temp-files to target-files
-	mv "$key_out_tmp" "$key_out" || {
+	/usr/bin/mv "$key_out_tmp" "$key_out" || {
 		die "Failed to move key temp-file"
 	}
-	mv "$req_out_tmp" "$req_out" || {
-		rm -f "$key_out" # Also remove the key
+	/usr/bin/mv "$req_out_tmp" "$req_out" || {
+		/usr/bin/rm -f "$key_out" # Also remove the key
 		die "Failed to move req temp-file"
 	}
 
@@ -2275,7 +2275,7 @@ to the latest Easy-RSA release."
 			die "sign_req - easyrsa_mktemp raw_ssl_cnf_tmp"
 
 		print "$copy_exts" | \
-			awk "$awkscript" "$EASYRSA_SSL_CONF" \
+			/usr/bin/awk "$awkscript" "$EASYRSA_SSL_CONF" \
 				> "$raw_ssl_cnf_tmp" || die "\
 Writing 'copy_exts' to SSL config temp-file failed"
 
@@ -2328,7 +2328,7 @@ Writing 'copy_exts' to SSL config temp-file failed"
 /^[[:blank:]]*basicConstraints[[:blank:]]*=/ { bC=$0 }
 END { if (length(bC) == 0 ) exit 1; print bC }'
 		basicConstraints="$(
-			awk "$awkscript" "$x509_type_file"
+			/usr/bin/awk "$awkscript" "$x509_type_file"
 			)" || die "\
 basicConstraints is not defined, cannot use 'pathlen'"
 		verbose "sign_req: Using basicConstraints pathlen"
@@ -2459,7 +2459,7 @@ $(display_dn req "$req_in")" # => confirm end
 Signing failed (openssl output above may have more detail)"
 	verbose "sign_req: signed cert '$file_name_base' OK"
 
-	mv "$crt_out_tmp" "$crt_out" || \
+	/usr/bin/mv "$crt_out_tmp" "$crt_out" || \
 		die "Failed to move temp-file to certificate."
 
 	# Success messages
@@ -2843,28 +2843,28 @@ revoke_move() {
 	done
 
 	# move crt, key and req file to renewed_then_revoked folders
-	mv "$crt_in" "$crt_out" || die "Failed to move: $crt_in"
+	/usr/bin/mv "$crt_in" "$crt_out" || die "Failed to move: $crt_in"
 
 	# only move the key if we have it
 	if [ -e "$key_in" ]; then
-		mv "$key_in" "$key_out" || warn "Failed to move: $key_in"
+		/usr/bin/mv "$key_in" "$key_out" || warn "Failed to move: $key_in"
 	fi
 
 	# only move the req if we have it
 	if [ -e "$req_in" ]; then
-		mv "$req_in" "$req_out" || warn "Failed to move: $req_in"
+		/usr/bin/mv "$req_in" "$req_out" || warn "Failed to move: $req_in"
 	fi
 
 	# remove any pkcs files
 	for pkcs in p12 p7b p8 p1; do
 		if [ -e "$in_dir/issued/$file_name_base.$pkcs" ]; then
 			# issued
-			rm "$in_dir/issued/$file_name_base.$pkcs" ||
+			/usr/bin/rm "$in_dir/issued/$file_name_base.$pkcs" ||
 				warn "Failed to remove: $file_name_base.$pkcs"
 
 		elif [ -e "$in_dir/private/$file_name_base.$pkcs" ]; then
 			# private
-			rm "$in_dir/private/$file_name_base.$pkcs" ||
+			/usr/bin/rm "$in_dir/private/$file_name_base.$pkcs" ||
 				warn "Failed to remove: $file_name_base.$pkcs"
 		else
 			: # ok
@@ -2873,21 +2873,21 @@ revoke_move() {
 
 	# remove the duplicate certificate
 	if [ -e "$dup_crt_by_serial" ]; then
-		rm "$dup_crt_by_serial" || warn "\
+		/usr/bin/rm "$dup_crt_by_serial" || warn "\
 Failed to remove the duplicate certificate:
 * $dup_crt_by_serial"
 	fi
 
 	# remove credentials file
 	if [ -e "$creds_in" ]; then
-		rm "$creds_in" || warn "\
+		/usr/bin/rm "$creds_in" || warn "\
 Failed to remove credentials file:
 * $creds_in"
 	fi
 
 	# remove inline file
 	if [ -e "$inline_in" ]; then
-		rm "$inline_in" || warn "\
+		/usr/bin/rm "$inline_in" || warn "\
 Failed to remove inline file:
 * $inline_in"
 	fi
@@ -3072,7 +3072,7 @@ deployed, use command:
 renew_restore_move() {
 	unset -v rrm_err error_undo_renew_move
 	# restore crt file to PKI folders
-	if mv "$restore_crt_out" "$restore_crt_in"; then
+	if /usr/bin/mv "$restore_crt_out" "$restore_crt_in"; then
 		: # ok
 	else
 		warn "Failed to restore: $restore_crt_out"
@@ -3109,35 +3109,35 @@ renew_move() {
 	# After this point, renew is possible!
 	restore_crt_in="$crt_in"
 	restore_crt_out="$crt_out"
-	mv "$crt_in" "$crt_out" || \
+	/usr/bin/mv "$crt_in" "$crt_out" || \
 		die "Failed to move: $crt_in"
 
 	# Further file removal is a convenience, only.
 	# remove any pkcs files
 	for pkcs in p12 p7b p8 p1; do
 		# issued
-		rm -f "$in_dir/issued/$file_name_base.$pkcs"
+		/usr/bin/rm -f "$in_dir/issued/$file_name_base.$pkcs"
 		# private
-		rm -f "$in_dir/private/$file_name_base.$pkcs"
+		/usr/bin/rm -f "$in_dir/private/$file_name_base.$pkcs"
 	done
 
 	# remove the duplicate certificate
 	if [ -e "$dup_crt_by_serial" ]; then
-		rm "$dup_crt_by_serial" || warn "\
+		/usr/bin/rm "$dup_crt_by_serial" || warn "\
 Failed to remove the duplicate certificate:
 * $dup_crt_by_serial"
 	fi
 
 	# remove credentials file
 	if [ -e "$creds_in" ]; then
-		rm "$creds_in" || warn "\
+		/usr/bin/rm "$creds_in" || warn "\
 Failed to remove credentials file:
 * $creds_in"
 	fi
 
 	# remove inline file
 	if [ -e "$inline_in" ]; then
-		rm "$inline_in" || warn "\
+		/usr/bin/rm "$inline_in" || warn "\
 Failed to remove inline file:
 * $inline_in"
 	fi
@@ -3289,16 +3289,16 @@ revoke_renewed_move() {
 	done
 
 	# move crt, key and req file to renewed_then_revoked folders
-	mv "$crt_in" "$crt_out" || die "Failed to move: $crt_in"
+	/usr/bin/mv "$crt_in" "$crt_out" || die "Failed to move: $crt_in"
 
 	# only move the key if we have it
 	if [ -e "$key_in" ]; then
-		mv "$key_in" "$key_out" || warn "Failed to move: $key_in"
+		/usr/bin/mv "$key_in" "$key_out" || warn "Failed to move: $key_in"
 	fi
 
 	# only move the req if we have it
 	if [ -e "$req_in" ]; then
-		mv "$req_in" "$req_out" || warn "Failed to move: $req_in"
+		/usr/bin/mv "$req_in" "$req_out" || warn "Failed to move: $req_in"
 	fi
 
 	return 0
@@ -3391,27 +3391,27 @@ with the following subject:
 "	# => confirm end
 
 	# move crt, key and req file to renewed folders
-	mv "$crt_in" "$crt_out" || die "Failed to move: $crt_in"
+	/usr/bin/mv "$crt_in" "$crt_out" || die "Failed to move: $crt_in"
 
 	# only move the key if we have it
 	if [ -e "$key_in" ]; then
-		if mv "$key_in" "$key_out"; then
+		if /usr/bin/mv "$key_in" "$key_out"; then
 			: # ok
 		else
 			# Attempt restore
-			mv -f "$crt_out" "$crt_in"
+			/usr/bin/mv -f "$crt_out" "$crt_in"
 			die "Failed to move: $key_in"
 		fi
 	fi
 
 	# only move the req if we have it
 	if [ -e "$req_in" ]; then
-		if mv "$req_in" "$req_out"; then
+		if /usr/bin/mv "$req_in" "$req_out"; then
 			: # ok
 		else
 			# Attempt restore
-			mv -f "$crt_out" "$crt_in"
-			mv -f "$key_out" "$key_in"
+			/usr/bin/mv -f "$crt_out" "$crt_in"
+			/usr/bin/mv -f "$key_out" "$key_in"
 			die "Failed to move: $req_in"
 		fi
 	fi
@@ -3508,7 +3508,7 @@ Cannot rebuild this certificate, a conflicting file exists.
 	# Extract certificate usage from old cert
 	cert_ext_key_usage="$(
 		easyrsa_openssl x509 -in "$crt_in" -noout -text |
-		sed -n "/X509v3 Extended Key Usage:/{n;s/^ *//g;p;}"
+		/usr/bin/sed -n "/X509v3 Extended Key Usage:/{n;s/^ *//g;p;}"
 		)"
 
 	case "$cert_ext_key_usage" in
@@ -3610,7 +3610,7 @@ deployed, use command:
 rebuild_restore_move() {
 	unset -v rrm_err error_undo_renew_move
 	# restore crt, key and req file to PKI folders
-	if mv "$restore_crt_out" "$restore_crt_in"; then
+	if /usr/bin/mv "$restore_crt_out" "$restore_crt_in"; then
 		: # ok
 	else
 		warn "Failed to restore: $restore_crt_out"
@@ -3619,7 +3619,7 @@ rebuild_restore_move() {
 
 	# only restore the key if we have it
 	if [ -e "$restore_key_out" ]; then
-		if mv "$restore_key_out" "$restore_key_in"; then
+		if /usr/bin/mv "$restore_key_out" "$restore_key_in"; then
 			: # ok
 		else
 			warn "Failed to restore: $restore_key_out"
@@ -3629,7 +3629,7 @@ rebuild_restore_move() {
 
 	# only restore the req if we have it
 	if [ -e "$restore_req_out" ]; then
-		if mv "$restore_req_out" "$restore_req_in"; then
+		if /usr/bin/mv "$restore_req_out" "$restore_req_in"; then
 			: # ok
 		else
 			warn "Failed to restore: $restore_req_out"
@@ -3740,7 +3740,7 @@ gen_crl() {
 		${EASYRSA_PASSIN:+ -passin "$EASYRSA_PASSIN"} || \
 			die "CRL Generation failed."
 
-	mv ${EASYRSA_BATCH:+ -f} "$out_file_tmp" "$out_file" || \
+	/usr/bin/mv ${EASYRSA_BATCH:+ -f} "$out_file_tmp" "$out_file" || \
 		die "Failed to update CRL file."
 
 	notice "\
@@ -4455,7 +4455,7 @@ ssl_cert_x509v3_eku() {
 	# Extract certificate usage from old cert
 	__eku="$(
 		easyrsa_openssl x509 -in "${__crt}" -noout -text | \
-			sed -n "/${__pattern}/{n;s/^ *//g;p;}"
+			/usr/bin/sed -n "/${__pattern}/{n;s/^ *//g;p;}"
 		)"
 
 	case "$__eku" in
@@ -6654,11 +6654,11 @@ up23_build_v3_vars ()
 	EASYRSA_VARSV2_TMP="$EASYRSA/vars-v2.tmp.$EASYRSA_EXT"
 	/usr/bin/rm -f "$EASYRSA_VARSV2_TMP"
 	EASYRSA_VARSV3_TMP="$EASYRSA/vars-v3.tmp.$EASYRSA_EXT"
-	rm -f "$EASYRSA_VARSV3_TMP"
+	/usr/bin/rm -f "$EASYRSA_VARSV3_TMP"
 	EASYRSA_VARSV3_NEW="$EASYRSA/vars-v3.new.$EASYRSA_EXT"
-	rm -f "$EASYRSA_VARSV3_NEW"
+	/usr/bin/rm -f "$EASYRSA_VARSV3_NEW"
 	EASYRSA_VARSV3_WRN="$EASYRSA/vars-v3.wrn.$EASYRSA_EXT"
-	rm -f "$EASYRSA_VARSV3_WRN"
+	/usr/bin/rm -f "$EASYRSA_VARSV3_WRN"
 
 	printf "%s\n" "\
 ########################++++++++++#########################
@@ -6733,17 +6733,17 @@ up23_do_upgrade_23 ()
 	then
 		# Must stay in this order
 		# New created dirs: EASYRSA_NEW_PKI and EASYRSA_SAFE_PKI
-		rm -rf "$EASYRSA_NEW_PKI"
-		rm -rf "$EASYRSA_SAFE_PKI"
+		/usr/bin/rm -rf "$EASYRSA_NEW_PKI"
+		/usr/bin/rm -rf "$EASYRSA_SAFE_PKI"
 		# EASYRSA_TARGET_VARSFILE is always the new created v3 vars
 		# Need to know if this fails
-		rm "$EASYRSA_TARGET_VARSFILE" \
+		/usr/bin/rm "$EASYRSA_TARGET_VARSFILE" \
 		|| up23_fail_upgrade "remove new vars file: $EASYRSA_TARGET_VARSFILE"
 		# EASYRSA_VER2_VARSFILE is either v2 *nix ./vars or Win vars.bat
 		# Need this dance because v2 vars is same name as v3 vars above
-		cp "$EASYRSA_VARS_LIVEBKP" "$EASYRSA_VER2_VARSFILE"
+		/usr/bin/cp "$EASYRSA_VARS_LIVEBKP" "$EASYRSA_VER2_VARSFILE"
 	fi
-	rm -f "$EASYRSA_VARS_LIVEBKP"
+	/usr/bin/rm -f "$EASYRSA_VARS_LIVEBKP"
 } #= up23_do_upgrade_23 ()
 
 up23_manage_upgrade_23 ()
