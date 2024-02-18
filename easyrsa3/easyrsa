@@ -757,7 +757,7 @@ remove_secure_session() {
 		[ -d "$secured_session" ]
 	then
 		# Always remove temp-session
-		if rm -rf "$secured_session"; then
+		if /usr/bin/rm -rf "$secured_session"; then
 			verbose "\
 remove_secure_session: DELETED: $secured_session"
 			unset -v secured_session mktemp_counter \
@@ -990,7 +990,7 @@ export EASYRSA_REQ_ORG=\"$EASYRSA_REQ_ORG\"
 export EASYRSA_REQ_OU=\"$EASYRSA_REQ_OU\"
 export EASYRSA_REQ_EMAIL=\"$EASYRSA_REQ_EMAIL\"
 export EASYRSA_REQ_SERIAL=\"$EASYRSA_REQ_SERIAL\"\
-" | sed -e s\`'\&'\`'\\\&'\`g \
+" | /usr/bin/sed -e s\`'\&'\`'\\\&'\`g \
 		-e s\`'\$'\`'\\\$'\`g \
 			> "$escape_hazard_tmp" || die "\
 escape_hazard - Failed to write temp-file"
@@ -1041,7 +1041,7 @@ easyrsa_mktemp safe_ssl_cnf_tmp"
 
 	# Rewrite
 	# shellcheck disable=SC2016 # No expansion inside ''
-	if sed \
+	if /usr/bin/sed \
 \
 -e s\`'$dir'\`\
 \""$EASYRSA_PKI"\"\`g \
@@ -1515,7 +1515,7 @@ install_data_to_pki: $context - Not creating pki/vars"
 				# Failure means that no vars will exist and
 				# 'cp' will generate an error message
 				# This is not a fatal error
-				if cp "${EASYRSA_PKI}/${vars_file_example}" \
+				if /usr/bin/cp "${EASYRSA_PKI}/${vars_file_example}" \
 					"${EASYRSA_PKI}/${vars_file}"
 				then
 					new_vars_true=1
@@ -1814,7 +1814,7 @@ Raw CA mode
 		[ "$EASYRSA_EXTRA_EXTS" ] && \
 			print "$EASYRSA_EXTRA_EXTS"
 
-	} | awk "$awkscript" "$EASYRSA_SSL_CONF" \
+	} | /usr/bin/awk "$awkscript" "$EASYRSA_SSL_CONF" \
 			> "$raw_ssl_cnf_tmp" || \
 			die "Copying X509_TYPES to config file failed"
 	verbose "build-ca: insert x509 and extensions OK"
@@ -2988,7 +2988,7 @@ Cannot renew this certificate, a conflicting file exists:
 		: # ok - Use current subjectAltName
 	else
 		san="$(
-easyrsa_openssl x509 -in "$crt_in" -noout -text | sed -n \
+easyrsa_openssl x509 -in "$crt_in" -noout -text | /usr/bin/sed -n \
 "/X509v3 Subject Alternative Name:\
 /{n;s/IP Address:/IP:/g;s/ //g;p;}"
 		)" || die "renew - san: easyrsa_openssl subshell"
@@ -3531,7 +3531,7 @@ Cannot rebuild this certificate, a conflicting file exists.
 		: # ok - Use current subjectAltName
 	else
 		san="$(
-		easyrsa_openssl x509 -in "$crt_in" -noout -text | sed -n \
+		easyrsa_openssl x509 -in "$crt_in" -noout -text | /usr/bin/sed -n \
 		"/X509v3 Subject Alternative Name:/{n;s/IP Address:/IP:/g;s/ //g;p;}"
 			)"
 
@@ -4178,7 +4178,7 @@ display_san - input error"
 		# Generate a SAN
 			san="$(
 		x509v3san='X509v3 Subject Alternative Name:'
-		easyrsa_openssl "$format" -in "$path" -noout -text | sed -n \
+		easyrsa_openssl "$format" -in "$path" -noout -text | /usr/bin/sed -n \
 		"/${x509v3san}/{n;s/ //g;s/IPAddress:/IP:/g;s/RegisteredID/RID/;p;}"
 		)"
 
@@ -6437,17 +6437,17 @@ up23_verify_current_ca ()
 
 	# Extract individual elements
 	CA_countryName="$(printf "%s\n" "$CA_SUBJECT" \
-	| /usr/bin/grep countryName | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep countryName | /usr/bin/sed "s\`^.*=\ \`\`g")"
 	CA_stateOrProvinceName="$(printf "%s\n" "$CA_SUBJECT" \
-	| /usr/bin/grep stateOrProvinceName | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep stateOrProvinceName | /usr/bin/sed "s\`^.*=\ \`\`g")"
 	CA_localityName="$(printf "%s\n" "$CA_SUBJECT" \
-	| /usr/bin/grep localityName | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep localityName | /usr/bin/sed "s\`^.*=\ \`\`g")"
 	CA_organizationName="$(printf "%s\n" "$CA_SUBJECT" \
-	| /usr/bin/grep organizationName | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep organizationName | /usr/bin/sed "s\`^.*=\ \`\`g")"
 	CA_organizationalUnitName="$(printf "%s\n" "$CA_SUBJECT" \
-	| /usr/bin/grep organizationalUnitName | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep organizationalUnitName | /usr/bin/sed "s\`^.*=\ \`\`g")"
 	CA_emailAddress="$(printf "%s\n" "$CA_SUBJECT" \
-	| /usr/bin/grep emailAddress | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep emailAddress | /usr/bin/sed "s\`^.*=\ \`\`g")"
 
 	# Match the current CA elements to the vars file settings
 	CA_vars_match=1
@@ -6536,7 +6536,7 @@ up23_create_new_pki ()
 	do
 		FILE_EXT="${i%%.*}"
 		DEST_DIR="${i##*.}"
-		if ls "$KEY_DIR/"*".$FILE_EXT" > /dev/null 2>&1; then
+		if /usr/bin/ls "$KEY_DIR/"*".$FILE_EXT" > /dev/null 2>&1; then
 			/usr/bin/cp "$KEY_DIR/"*".$FILE_EXT" "$EASYRSA_PKI/$DEST_DIR" \
 			|| up23_fail_upgrade "Failed to copy .$FILE_EXT"
 		else
@@ -6686,7 +6686,7 @@ up23_build_v3_vars ()
 	} > "$EASYRSA_VARSV3_TMP" \
 	|| up23_fail_upgrade "Failed to create $EASYRSA_VARSV3_TMP"
 
-	# cat temp files into new v3 vars
+	# /usr/bin/cat temp files into new v3 vars
 	/usr/bin/cat "$EASYRSA_VARSV3_WRN" "$EASYRSA_VARSV3_EXMP" "$EASYRSA_VARSV3_TMP" \
 	> "$EASYRSA_VARSV3_NEW" \
 	|| up23_fail_upgrade "Failed to create $EASYRSA_VARSV3_NEW"
