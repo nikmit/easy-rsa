@@ -737,7 +737,7 @@ secure_session() {
 		secured_session="${EASYRSA_TEMP_DIR}/${session}"
 
 		# atomic:
-		if mkdir "$secured_session"; then
+		if /usr/bin/mkdir "$secured_session"; then
 			# New session requires safe-ssl conf
 			unset -v mktemp_counter \
 				OPENSSL_CONF safe_ssl_cnf_tmp \
@@ -854,7 +854,7 @@ cleanup() {
 	# In case of subshell abuse, display error log file
 	if [ -f "$easyrsa_err_log" ]; then
 		print
-		cat "$easyrsa_err_log"
+		/usr/bin/cat "$easyrsa_err_log"
 		print
 	fi
 
@@ -873,9 +873,9 @@ Temporary session not preserved."
 			else
 				# create temp-snapshot
 				keep_tmp="$EASYRSA_TEMP_DIR/tmp/$EASYRSA_KEEP_TEMP"
-				mkdir -p "$keep_tmp"
-				rm -rf "$keep_tmp"
-				mv -f "$secured_session" "$keep_tmp"
+				/usr/bin/mkdir -p "$keep_tmp"
+				/usr/bin/rm -rf "$keep_tmp"
+				/usr/bin/mv -f "$secured_session" "$keep_tmp"
 				print "Temp session preserved: $keep_tmp"
 			fi
 		else
@@ -1350,7 +1350,7 @@ and initialize a fresh PKI here."
 
 	# new dirs:
 	for i in private reqs inline; do
-		mkdir -p "$EASYRSA_PKI/$i" || \
+		/usr/bin/mkdir -p "$EASYRSA_PKI/$i" || \
 			die "\
 Failed to create PKI file structure (permissions?)"
 	done
@@ -1669,7 +1669,7 @@ Unable to create necessary PKI files (permissions?)"
 		revoked/certs_by_serial revoked/private_by_serial \
 		revoked/reqs_by_serial
 	do
-		mkdir -p "$EASYRSA_PKI/$i" || die "$err_msg"
+		/usr/bin/mkdir -p "$EASYRSA_PKI/$i" || die "$err_msg"
 	done
 
 	# create necessary files:
@@ -1701,7 +1701,7 @@ Unable to create necessary PKI files (permissions?)"
 
 	# Check for insert-marker in ssl config file
 	if [ "$EASYRSA_EXTRA_EXTS" ]; then
-		if ! grep -q '^#%CA_X509_TYPES_EXTRA_EXTS%' \
+		if ! /usr/bin/grep -q '^#%CA_X509_TYPES_EXTRA_EXTS%' \
 			"$EASYRSA_SSL_CONF"
 		then
 			die "\
@@ -1798,14 +1798,14 @@ Raw CA mode
 	{
 		# 'ca' file
 		if [ -f "$EASYRSA_EXT_DIR/ca" ]; then
-			cat "$EASYRSA_EXT_DIR/ca"
+			/usr/bin/cat "$EASYRSA_EXT_DIR/ca"
 		else
 			create_x509_type ca
 		fi
 
 		# COMMON file
 		if [ -f "$EASYRSA_EXT_DIR/COMMON" ]; then
-			cat "$EASYRSA_EXT_DIR/COMMON"
+			/usr/bin/cat "$EASYRSA_EXT_DIR/COMMON"
 		else
 			create_x509_type COMMON
 		fi
@@ -2074,7 +2074,7 @@ Continuing with key generation will replace this key."
 	# append it to openssl's [req] section:
 	if [ "$EASYRSA_EXTRA_EXTS" ]; then
 		# Check for insert-marker in ssl config file
-		if ! grep -q '^#%EXTRA_EXTS%' "$EASYRSA_SSL_CONF"
+		if ! /usr/bin/grep -q '^#%EXTRA_EXTS%' "$EASYRSA_SSL_CONF"
 		then
 			die "\
 This openssl config file does \
@@ -2249,7 +2249,7 @@ $check_serial"
 	# adjust openssl's [default_ca] section:
 	if [ "$EASYRSA_CP_EXT" ]; then
 		# Check for insert-marker in ssl config file
-		if ! grep -q '^#%COPY_EXTS%' "$EASYRSA_SSL_CONF"
+		if ! /usr/bin/grep -q '^#%COPY_EXTS%' "$EASYRSA_SSL_CONF"
 		then
 			die "\
 This openssl config file does \
@@ -2369,7 +2369,7 @@ basicConstraints is not defined, cannot use 'pathlen'"
 	# Begin output redirect
 	{
 		# Append $cert-type extensions
-		cat "$x509_COMMON_file" "$x509_type_file"
+		/usr/bin/cat "$x509_COMMON_file" "$x509_type_file"
 
 		# Support a dynamic CA path length when present:
 		if [ "$basicConstraints" ]; then
@@ -2569,7 +2569,7 @@ Conflicting file found at:
 
 	# Make inline directory
 	[ -d "$EASYRSA_PKI/inline" ] ||	\
-		mkdir -p "$EASYRSA_PKI/inline" || \
+		/usr/bin/mkdir -p "$EASYRSA_PKI/inline" || \
 			die "Failed to create inline directoy."
 
 	# Confirm over write inline file
@@ -2632,7 +2632,7 @@ inline_creds () {
 
 		crt_data="\
 <cert>
-$(cat "$crt_source")
+$(/usr/bin/cat "$crt_source")
 </cert>"
 	else
 		# Set EasyRSA cert type to 'undefined'
@@ -2647,7 +2647,7 @@ $(cat "$crt_source")
 	if [ -e "$key_source" ]; then
 		key_data="\
 <key>
-$(cat "$key_source")
+$(/usr/bin/cat "$key_source")
 </key>"
 	else
 		incomplete=1
@@ -2660,7 +2660,7 @@ $(cat "$key_source")
 	if [ -e "$ca_source" ]; then
 		ca_data="\
 <ca>
-$(cat "$ca_source")
+$(/usr/bin/cat "$ca_source")
 </ca>"
 	else
 		incomplete=1
@@ -2838,7 +2838,7 @@ revoke_move() {
 		"$out_dir/reqs_by_serial"
 	do
 		[ -d "$target" ] && continue
-		mkdir -p "$target" ||
+		/usr/bin/mkdir -p "$target" ||
 			die "Failed to mkdir: $target"
 	done
 
@@ -2976,14 +2976,14 @@ Cannot renew this certificate, a conflicting file exists:
 
 	# Make inline directory
 	[ -d "$EASYRSA_PKI/inline" ] ||	\
-		mkdir -p "$EASYRSA_PKI/inline" || \
+		/usr/bin/mkdir -p "$EASYRSA_PKI/inline" || \
 			die "Failed to create inline directoy."
 
 	# Extract certificate usage from old cert
 	ssl_cert_x509v3_eku "$crt_in" cert_type
 
 	# Use SAN from --san if set else use SAN from old cert
-	if echo "$EASYRSA_EXTRA_EXTS" | grep -q subjectAltName
+	if echo "$EASYRSA_EXTRA_EXTS" | /usr/bin/grep -q subjectAltName
 	then
 		: # ok - Use current subjectAltName
 	else
@@ -3101,7 +3101,7 @@ renew_move() {
 		"$out_dir/reqs"
 	do
 		[ -d "$target" ] && continue
-		mkdir -p "$target" ||
+		/usr/bin/mkdir -p "$target" ||
 			die "Failed to mkdir: $target"
 	done
 
@@ -3284,7 +3284,7 @@ revoke_renewed_move() {
 		"$out_dir/reqs_by_serial"
 	do
 		[ -d "$target" ] && continue
-		mkdir -p "$target" ||
+		/usr/bin/mkdir -p "$target" ||
 			die "Failed to mkdir: $target"
 	done
 
@@ -3344,7 +3344,7 @@ Request was expected at:
 	# get the commonName of the certificate via DN
 	crt_cn="$(
 		easyrsa_openssl x509 -in "$crt_in" -noout \
-		-subject -nameopt utf8,multiline | grep \
+		-subject -nameopt utf8,multiline | /usr/bin/grep \
 			'^[[:blank:]]*commonName[[:blank:]]*=[[:blank:]]'
 		)" || die "Failed to find commonName in certificate"
 	crt_cn="${crt_cn#*= }"
@@ -3357,7 +3357,7 @@ Request was expected at:
 
 	# Create out_dir
 	for newdir in issued private reqs; do
-		mkdir -p "$out_dir/$newdir" || \
+		/usr/bin/mkdir -p "$out_dir/$newdir" || \
 			die "Failed to create: $out_dir/$newdir"
 	done
 
@@ -3526,7 +3526,7 @@ Cannot rebuild this certificate, a conflicting file exists.
 
 	# Use SAN from --subject-alt-name, if set
 	# else use SAN from old cert
-	if echo "$EASYRSA_EXTRA_EXTS" | grep -q subjectAltName
+	if echo "$EASYRSA_EXTRA_EXTS" | /usr/bin/grep -q subjectAltName
 	then
 		: # ok - Use current subjectAltName
 	else
@@ -3659,39 +3659,39 @@ rebuild_move() {
 		"$out_dir/reqs"
 	do
 		[ -d "$target" ] && continue
-		mkdir -p "$target" ||
+		/usr/bin/mkdir -p "$target" ||
 			die "Failed to mkdir: $target"
 	done
 
 	# move crt, key and req file to renewed folders
 	restore_crt_in="$crt_in"
 	restore_crt_out="$crt_out"
-	mv "$crt_in" "$crt_out" || die "Failed to move: $crt_in"
+	/usr/bin/mv "$crt_in" "$crt_out" || die "Failed to move: $crt_in"
 
 	# only move the key if we have it
 	restore_key_in="$key_in"
 	restore_key_out="$key_out"
 	if [ -e "$key_in" ]; then
-		mv "$key_in" "$key_out" || warn "Failed to move: $key_in"
+		/usr/bin/mv "$key_in" "$key_out" || warn "Failed to move: $key_in"
 	fi
 
 	# only move the req if we have it
 	restore_req_in="$req_in"
 	restore_req_out="$req_out"
 	if [ -e "$req_in" ]; then
-		mv "$req_in" "$req_out" || warn "Failed to move: $req_in"
+		/usr/bin/mv "$req_in" "$req_out" || warn "Failed to move: $req_in"
 	fi
 
 	# remove any pkcs files
 	for pkcs in p12 p7b p8 p1; do
 		if [ -e "$in_dir/issued/$file_name_base.$pkcs" ]; then
 			# issued
-			rm "$in_dir/issued/$file_name_base.$pkcs" ||
+			/usr/bin/rm "$in_dir/issued/$file_name_base.$pkcs" ||
 				warn "Failed to remove: $file_name_base.$pkcs"
 
 		elif [ -e "$in_dir/private/$file_name_base.$pkcs" ]; then
 			# private
-			rm "$in_dir/private/$file_name_base.$pkcs" ||
+			/usr/bin/rm "$in_dir/private/$file_name_base.$pkcs" ||
 				warn "Failed to remove: $file_name_base.$pkcs"
 		else
 			: # ok
@@ -3700,21 +3700,21 @@ rebuild_move() {
 
 	# remove the duplicate certificate
 	if [ -e "$dup_crt_by_serial" ]; then
-		rm "$dup_crt_by_serial" || warn "\
+		/usr/bin/rm "$dup_crt_by_serial" || warn "\
 Failed to remove the duplicate certificate:
 * $dup_crt_by_serial"
 	fi
 
 	# remove credentials file
 	if [ -e "$creds_in" ]; then
-		rm "$creds_in" || warn "\
+		/usr/bin/rm "$creds_in" || warn "\
 Failed to remove credentials file:
 * $creds_in"
 	fi
 
 	# remove inline file
 	if [ -e "$inline_in" ]; then
-		rm "$inline_in" || warn "\
+		/usr/bin/rm "$inline_in" || warn "\
 Failed to remove inline file:
 * $inline_in"
 	fi
@@ -3731,7 +3731,7 @@ gen_crl() {
 		die "gen_crl - easyrsa_mktemp out_file_tmp"
 
 	if [ -r "$out_file" ]; then
-		cp -p "$out_file" "$out_file_tmp" || \
+		/usr/bin/cp -p "$out_file" "$out_file_tmp" || \
 			warn "Failed to preserve CRL file permissions."
 	fi
 
@@ -3778,7 +3778,7 @@ Conflicting file already exists at:
 * $out_req"
 
 	# now import it
-	cp "$in_req" "$out_req"
+	/usr/bin/cp "$in_req" "$out_req"
 
 	notice "\
 Request successfully imported with short-name: $short_name
@@ -4068,14 +4068,14 @@ Failed to change the private key passphrase.
 See above for possible openssl error messages."
 
 	# Move old key-file out of the way
-	mv "$file" "${file}.tmp" || \
+	/usr/bin/mv "$file" "${file}.tmp" || \
 		die "Failed to move the old-key file."
 
 	# Move new key-file into place
-	if mv "$out_key_tmp" "$file"; then
-		rm -f "${file}.tmp"
+	if /usr/bin/mv "$out_key_tmp" "$file"; then
+		/usr/bin/rm -f "${file}.tmp"
 	else
-		mv -f "${file}.tmp" "$file"
+		/usr/bin/mv -f "${file}.tmp" "$file"
 		die "Failed to update the private key file."
 	fi
 
@@ -4135,14 +4135,14 @@ ${cipher:+You will then enter a new password for this key.$NL}"
 			die "Failed to change the private key passphrase."
 
 	# Move old key-file out of the way
-	mv "$file" "${file}.tmp" || \
+	/usr/bin/mv "$file" "${file}.tmp" || \
 		die "Failed to move the old-key file."
 
 	# Move new key-file into place
-	if mv "$out_key_tmp" "$file"; then
-		rm -f "${file}.tmp"
+	if /usr/bin/mv "$out_key_tmp" "$file"; then
+		/usr/bin/rm -f "${file}.tmp"
 	else
-		mv -f "${file}.tmp" "$file"
+		/usr/bin/mv -f "${file}.tmp" "$file"
 		die "Failed to update the private key file."
 	fi
 
@@ -4167,11 +4167,11 @@ display_san - input error"
 	path="$2"
 	shift 2
 
-	if echo "$EASYRSA_EXTRA_EXTS" | grep -q subjectAltName; then
+	if echo "$EASYRSA_EXTRA_EXTS" | /usr/bin/grep -q subjectAltName; then
 		# Print user defined SAN
 			print "$(\
-		echo "$EASYRSA_EXTRA_EXTS" | grep subjectAltName | \
-		sed 's/^[[:space:]]*subjectAltName[[:space:]]*=[[:space:]]*//'
+		/usr/bin/echo "$EASYRSA_EXTRA_EXTS" | /usr/bin/grep subjectAltName | \
+		/usr/bin/sed 's/^[[:space:]]*subjectAltName[[:space:]]*=[[:space:]]*//'
 		)"
 
 	else
@@ -4233,12 +4233,12 @@ default_server_san - input error"
 	cn="$(
 		easyrsa_openssl req -in "$path" -noout -subject \
 			-nameopt sep_multiline |
-				awk -F'=' '/^  *CN=/{print $2}'
+				/usr/bin/awk -F'=' '/^  *CN=/{print $2}'
 		)"
 
 	# See: https://github.com/OpenVPN/easy-rsa/issues/576
 	# Select default SAN
-	if echo "$cn" | grep -q \
+	if echo "$cn" | /usr/bin/grep -q \
 		-E '^[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}$'
 	then
 		print "subjectAltName = IP:$cn"
@@ -5595,7 +5595,7 @@ EasyRSA '$cmd' does not support --startdate or --enddate"
 
 	# Insecure Windows directory
 	if [ "$easyrsa_host_os" = win ]; then
-		if echo "$PWD" | grep -q '/Prog.*/OpenVPN/easy-rsa'
+		if echo "$PWD" | /usr/bin/grep -q '/Prog.*/OpenVPN/easy-rsa'
 		then
 			verbose "\
 Using Windows-System-Folders for your PKI is NOT SECURE!
@@ -5714,7 +5714,7 @@ Using Easy-RSA 'vars' configuration:
 * $target_file"
 
 	# Sanitize vars
-	if grep -q \
+	if /usr/bin/grep -q \
 		-e 'EASYRSA_PASSIN' -e 'EASYRSA_PASSOUT' \
 		-e '[^(]`[^)]' \
 		"$target_file"
@@ -5733,7 +5733,7 @@ Please, correct these errors and try again."
 	fi
 
 	# Sanitize vars
-	if grep -q \
+	if /usr/bin/grep -q \
 		-e '[[:blank:]]export[[:blank:]]*' \
 		-e '[[:blank:]]unset[[:blank:]]*' \
 		"$target_file"
@@ -5972,29 +5972,29 @@ force_set_var() {
 create_x509_type() {
 	case "$1" in
 	COMMON)
-		cat <<- "X509_TYPE_COMMON"
+		/usr/bin/cat <<- "X509_TYPE_COMMON"
 		X509_TYPE_COMMON
 	;;
 	serverClient)
 		create_x509_type_easyrsa
-		cat <<- "X509_TYPE_SERV_CLI"
+		/usr/bin/cat <<- "X509_TYPE_SERV_CLI"
 		extendedKeyUsage = serverAuth,clientAuth
 		X509_TYPE_SERV_CLI
 	;;
 	server)
 		create_x509_type_easyrsa
-		cat <<- "X509_TYPE_SERV"
+		/usr/bin/cat <<- "X509_TYPE_SERV"
 		extendedKeyUsage = serverAuth
 		X509_TYPE_SERV
 	;;
 	client)
 		create_x509_type_easyrsa
-		cat <<- "X509_TYPE_CLI"
+		/usr/bin/cat <<- "X509_TYPE_CLI"
 		extendedKeyUsage = clientAuth
 		X509_TYPE_CLI
 	;;
 	ca)
-		cat <<- "X509_TYPE_CA"
+		/usr/bin/cat <<- "X509_TYPE_CA"
 		basicConstraints = CA:TRUE
 		subjectKeyIdentifier = hash
 		authorityKeyIdentifier = keyid:always,issuer:always
@@ -6010,7 +6010,7 @@ create_x509_type() {
 # Create x509-type/easyrsa
 # This could be COMMON but not is not suitable for a CA
 create_x509_type_easyrsa() {
-	cat <<- "X509_TYPE_EASYRSA"
+	/usr/bin/cat <<- "X509_TYPE_EASYRSA"
 		basicConstraints = CA:FALSE
 		subjectKeyIdentifier = hash
 		authorityKeyIdentifier = keyid,issuer:always
@@ -6020,7 +6020,7 @@ create_x509_type_easyrsa() {
 
 # Create vars.example - Minimum settings only
 create_vars_example() {
-	cat << "VARS_EXAMPLE"
+	/usr/bin/cat << "VARS_EXAMPLE"
 # Easy-RSA 3 parameter settings
 
 # NOTE: If you installed Easy-RSA from your package manager, do not edit
@@ -6170,7 +6170,7 @@ VARS_EXAMPLE
 
 # Create openssl-easyrsa.cnf
 create_openssl_easyrsa_cnf() {
-	cat << "SSL_CONFIG"
+	/usr/bin/cat << "SSL_CONFIG"
 # For use with Easy-RSA 3.0+ and OpenSSL or LibreSSL
 
 ####################################################################
@@ -6393,7 +6393,7 @@ up23_verify_current_pki ()
 	up23_verbose "> Verify CURRENT PKI vars .."
 
 	# This can probably be improved
-	EASYRSA_NO_REM="$(grep '^set ' "$EASYRSA_VER2_VARSFILE")"
+	EASYRSA_NO_REM="$(/usr/bin/grep '^set ' "$EASYRSA_VER2_VARSFILE")"
 
 	# This list may not be complete
 	# Not required: DH_KEY_SIZE PKCS11_MODULE_PATH PKCS11_PIN
@@ -6402,7 +6402,7 @@ up23_verify_current_pki ()
 	do
 		# Effectively, source the v2 vars file
 		UNIQUE="set $i"
-		KEY_grep="$(printf "%s\n" "$EASYRSA_NO_REM" | grep "$UNIQUE")"
+		KEY_grep="$(printf "%s\n" "$EASYRSA_NO_REM" | /usr/bin/grep "$UNIQUE")"
 		KEY_value="${KEY_grep##*=}"
 		set_var $i "$KEY_value"
 	done
@@ -6437,17 +6437,17 @@ up23_verify_current_ca ()
 
 	# Extract individual elements
 	CA_countryName="$(printf "%s\n" "$CA_SUBJECT" \
-	| grep countryName | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep countryName | sed "s\`^.*=\ \`\`g")"
 	CA_stateOrProvinceName="$(printf "%s\n" "$CA_SUBJECT" \
-	| grep stateOrProvinceName | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep stateOrProvinceName | sed "s\`^.*=\ \`\`g")"
 	CA_localityName="$(printf "%s\n" "$CA_SUBJECT" \
-	| grep localityName | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep localityName | sed "s\`^.*=\ \`\`g")"
 	CA_organizationName="$(printf "%s\n" "$CA_SUBJECT" \
-	| grep organizationName | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep organizationName | sed "s\`^.*=\ \`\`g")"
 	CA_organizationalUnitName="$(printf "%s\n" "$CA_SUBJECT" \
-	| grep organizationalUnitName | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep organizationalUnitName | sed "s\`^.*=\ \`\`g")"
 	CA_emailAddress="$(printf "%s\n" "$CA_SUBJECT" \
-	| grep emailAddress | sed "s\`^.*=\ \`\`g")"
+	| /usr/bin/grep emailAddress | sed "s\`^.*=\ \`\`g")"
 
 	# Match the current CA elements to the vars file settings
 	CA_vars_match=1
@@ -6494,14 +6494,14 @@ up23_backup_current_pki ()
 {
 	up23_verbose "> Backup current PKI .."
 
-	mkdir -p "$EASYRSA_SAFE_PKI" \
+	/usr/bin/mkdir -p "$EASYRSA_SAFE_PKI" \
 	|| up23_fail_upgrade "Failed to create safe PKI dir: $EASYRSA_SAFE_PKI"
 
-	cp -r "$KEY_DIR" "$EASYRSA_SAFE_PKI" \
+	/usr/bin/cp -r "$KEY_DIR" "$EASYRSA_SAFE_PKI" \
 	|| up23_fail_upgrade "Failed to copy $KEY_DIR to $EASYRSA_SAFE_PKI"
 
 	# EASYRSA_VER2_VARSFILE is either version 2 *nix ./vars or Win vars.bat
-	cp "$EASYRSA_VER2_VARSFILE" "$EASYRSA_SAFE_PKI" \
+	/usr/bin/cp "$EASYRSA_VER2_VARSFILE" "$EASYRSA_SAFE_PKI" \
 	|| up23_fail_upgrade "Failed to copy $EASYRSA_VER2_VARSFILE to EASYRSA_SAFE_PKI"
 
 	up23_verbose "> OK"
@@ -6515,7 +6515,7 @@ up23_create_new_pki ()
 	up23_verbose ">> Create NEW PKI dirs .."
 	for i in private reqs issued certs_by_serial
 	do
-		mkdir -p "$EASYRSA_PKI/$i" \
+		/usr/bin/mkdir -p "$EASYRSA_PKI/$i" \
 		|| up23_fail_upgrade "Failed to Create NEW PKI dir: $EASYRSA_PKI/$i"
 	done
 	up23_verbose ">> OK"
@@ -6525,7 +6525,7 @@ up23_create_new_pki ()
 	# Files ignored: index.txt.old serial.old
 	for i in index.txt serial ca.crt index.txt.attr
 	do
-		cp "$KEY_DIR/$i" "$EASYRSA_PKI" \
+		/usr/bin/cp "$KEY_DIR/$i" "$EASYRSA_PKI" \
 		|| up23_fail_upgrade "Failed to copy $KEY_DIR/$i to $EASYRSA_PKI"
 	done
 	up23_verbose ">> OK"
@@ -6537,7 +6537,7 @@ up23_create_new_pki ()
 		FILE_EXT="${i%%.*}"
 		DEST_DIR="${i##*.}"
 		if ls "$KEY_DIR/"*".$FILE_EXT" > /dev/null 2>&1; then
-			cp "$KEY_DIR/"*".$FILE_EXT" "$EASYRSA_PKI/$DEST_DIR" \
+			/usr/bin/cp "$KEY_DIR/"*".$FILE_EXT" "$EASYRSA_PKI/$DEST_DIR" \
 			|| up23_fail_upgrade "Failed to copy .$FILE_EXT"
 		else
 			up23_verbose "   Note: No .$FILE_EXT files found"
@@ -6556,7 +6556,7 @@ up23_upgrade_ca ()
 	up23_verbose "> Confirm that index.txt.attr exists and 'unique_subject = no'"
 	if [ -f "$EASYRSA_PKI/index.txt.attr" ]
 	then
-		if grep -q 'unique_subject = no' "$EASYRSA_PKI/index.txt.attr"
+		if /usr/bin/grep -q 'unique_subject = no' "$EASYRSA_PKI/index.txt.attr"
 		then
 			# If index.txt.attr exists and "unique_suject = no" then do nothing
 			return 0
@@ -6580,7 +6580,7 @@ up23_create_openssl_cnf ()
 	up23_verbose "> OpenSSL config .."
 	EASYRSA_PKI_SSL_CNFFILE="$EASYRSA_PKI/openssl-easyrsa.cnf"
 	EASYRSA_PKI_SAFE_CNFFILE="$EASYRSA_PKI/safessl-easyrsa.cnf"
-	cp "$EASYRSA_SSL_CNFFILE" "$EASYRSA_PKI_SSL_CNFFILE" \
+	/usr/bin/cp "$EASYRSA_SSL_CNFFILE" "$EASYRSA_PKI_SSL_CNFFILE" \
 	|| up23_fail_upgrade "create $EASYRSA_PKI_SSL_CNFFILE"
 	up23_verbose "> OK"
 	up23_verbose "  New OpenSSL config file created in: $EASYRSA_PKI_SSL_CNFFILE"
@@ -6622,13 +6622,13 @@ up23_move_easyrsa2_programs ()
 		WIN_FILE="$EASYRSA/$i.bat"
 		if [ -f "$NIX_FILE" ]
 		then
-			cp "$NIX_FILE" "$EASYRSA_SAFE_PKI" \
+			/usr/bin/cp "$NIX_FILE" "$EASYRSA_SAFE_PKI" \
 			|| up23_fail_upgrade "copy $NIX_FILE $EASYRSA_SAFE_PKI"
 		fi
 
 		if [ -f "$WIN_FILE" ]
 		then
-			cp "$WIN_FILE" "$EASYRSA_SAFE_PKI" \
+			/usr/bin/cp "$WIN_FILE" "$EASYRSA_SAFE_PKI" \
 			|| up23_fail_upgrade "copy $WIN_FILE $EASYRSA_SAFE_PKI"
 		fi
 
@@ -6638,7 +6638,7 @@ up23_move_easyrsa2_programs ()
 		fi
 
 	# These files are not removed on TEST run
-	[ "$NOSAVE" -eq 1  ] && rm -f "$NIX_FILE" "$WIN_FILE"
+	[ "$NOSAVE" -eq 1  ] && /usr/bin/rm -f "$NIX_FILE" "$WIN_FILE"
 	done
 
 	up23_verbose "> OK"
@@ -6652,7 +6652,7 @@ up23_build_v3_vars ()
 
 	EASYRSA_EXT="easyrsa-upgrade-23"
 	EASYRSA_VARSV2_TMP="$EASYRSA/vars-v2.tmp.$EASYRSA_EXT"
-	rm -f "$EASYRSA_VARSV2_TMP"
+	/usr/bin/rm -f "$EASYRSA_VARSV2_TMP"
 	EASYRSA_VARSV3_TMP="$EASYRSA/vars-v3.tmp.$EASYRSA_EXT"
 	rm -f "$EASYRSA_VARSV3_TMP"
 	EASYRSA_VARSV3_NEW="$EASYRSA/vars-v3.new.$EASYRSA_EXT"
@@ -6687,23 +6687,23 @@ up23_build_v3_vars ()
 	|| up23_fail_upgrade "Failed to create $EASYRSA_VARSV3_TMP"
 
 	# cat temp files into new v3 vars
-	cat "$EASYRSA_VARSV3_WRN" "$EASYRSA_VARSV3_EXMP" "$EASYRSA_VARSV3_TMP" \
+	/usr/bin/cat "$EASYRSA_VARSV3_WRN" "$EASYRSA_VARSV3_EXMP" "$EASYRSA_VARSV3_TMP" \
 	> "$EASYRSA_VARSV3_NEW" \
 	|| up23_fail_upgrade "Failed to create $EASYRSA_VARSV3_NEW"
 
 	# This file must be created and restored at the end of TEST
 	# for the REAL update to to succeed
 	EASYRSA_VARS_LIVEBKP="$EASYRSA_TARGET_VARSFILE.livebackup"
-	cp "$EASYRSA_VER2_VARSFILE" "$EASYRSA_VARS_LIVEBKP" \
+	/usr/bin/cp "$EASYRSA_VER2_VARSFILE" "$EASYRSA_VARS_LIVEBKP" \
 	|| up23_fail_upgrade "Failed to create $EASYRSA_VARS_LIVEBKP"
-	rm -f "$EASYRSA_VER2_VARSFILE"
+	/usr/bin/rm -f "$EASYRSA_VER2_VARSFILE"
 
 	# "$EASYRSA_TARGET_VARSFILE" is always $EASYRSA/vars
-	cp "$EASYRSA_VARSV3_NEW" "$EASYRSA_TARGET_VARSFILE" \
+	/usr/bin/cp "$EASYRSA_VARSV3_NEW" "$EASYRSA_TARGET_VARSFILE" \
 	|| up23_fail_upgrade "copy $EASYRSA_VARSV3_NEW to $EASYRSA_TARGET_VARSFILE"
 
 	# Delete temp files
-	rm -f "$EASYRSA_VARSV2_TMP" "$EASYRSA_VARSV3_TMP" \
+	/usr/bin/rm -f "$EASYRSA_VARSV2_TMP" "$EASYRSA_VARSV3_TMP" \
 	"$EASYRSA_VARSV3_NEW" "$EASYRSA_VARSV3_WRN"
 
 	up23_verbose "> OK"
@@ -6755,14 +6755,14 @@ up23_manage_upgrade_23 ()
 	# Verify all existing versions of vars/vars.bat
 	if [ -f "$vars" ]
 	then
-		if grep -q 'Complain if a user tries to do this:' "$vars"
+		if /usr/bin/grep -q 'Complain if a user tries to do this:' "$vars"
 		then
 			EASYRSA_FOUND_VARS=1
 			EASYRSA_VARS_IS_VER3=1
 		fi
 
 		# Easyrsa v3 does not use NOR allow use of `export`.
-		if grep -q 'export' "$vars"
+		if /usr/bin/grep -q 'export' "$vars"
 		then
 			EASYRSA_FOUND_VARS=1
 			EASYRSA_VARS_IS_VER2=1
@@ -6930,7 +6930,7 @@ print_version()
 		OPENSSL_CONF=/dev/null \
 			"${EASYRSA_OPENSSL:-openssl}" version
 		)"
-		cat << VERSION_TEXT
+		/usr/bin/cat << VERSION_TEXT
 EasyRSA Version Information
 Version:     $EASYRSA_version
 Generated:   ~DATE~
